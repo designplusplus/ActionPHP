@@ -2,12 +2,6 @@
 
 date_default_timezone_set('Asia/Taipei');
 
-// ==================================================== Constants ====================================================//
-
-define('ap_cst_Infinity', INF); // -ap_cst_Infinity
-define('ap_cst_NaN', NAN);
-define('ap_cst_undefined', null);
-
 // ==================================================== Functions ====================================================//
 
 function ap_fun_array():array {
@@ -32,22 +26,24 @@ function ap_fun_int(int $number):int {
 }
 
 function ap_fun_isFinite(float $number):bool {
-    if($number == ap_cst_Infinity || $number == -ap_cst_Infinity) return false;
-    return true;
+    return $number == INF || $number == -INF ? false : true;
 }
 
 function ap_fun_isNaN($mixed):bool {
-    if(is_nan($mixed)) return true;
-    return false;
+    return is_nan($mixed) ? true : false;
+}
+
+function ap_fun_isNull($mixed):bool {
+    return is_null($mixed) ? true : false;
 }
 
 function ap_fun_number($number) {
     if(is_null($number)) return 0;
     if(is_bool($number) && $number == true) return 1;
     if(is_bool($number) && $number == false) return 0;
-    if(is_nan($number)) return ap_cst_NaN;
+    if(is_nan($number)) return NAN;
     if($number == "") return 0;
-    if(is_string($number)) return ap_cst_NaN;
+    if(is_string($number)) return NAN;
     return $number;
 }
 
@@ -92,7 +88,7 @@ function ap_fun_trace() {
     }
     $args = func_get_args();
     $args_len = count($args);
-    echo '<div style="font-size: 10px;background: rgba(0,0,0,0.8);color: white; left:0px; top:0px; right:0px; padding:10px; border-bottom: 1px dashed gray;">';
+    echo '<div style="font-size: 10px;background: rgba(0,0,0,0.8);color: white; left:0; top:0; right:0; padding:10px; border-bottom: 1px dashed gray;">';
     if($args_len == 1)
         if(is_array($args[0])) {
             r_trace($args[0],0);
@@ -126,8 +122,14 @@ class AP_String extends  AP_Object {
     public static function charAt($str, $index){return $str{$index};} //取得字串索引字元
     public static function charCodeAt($str, $index){return ord($str{$index});} //取得字串索引字元ASCII編號
     public static function fromCharCode($code){return chr($code);} //取得ASCII編號字元
-    public static function indexOf($str, $match){return strpos($str, $match);} //從字串開頭搜尋相符字串索引
-    public static function lastIndexOf($str, $match){return strrpos($str, $match);} //從字串結尾搜尋相符字串索引
+    public static function indexOf($str, $match){ //從字串開頭搜尋相符字串索引
+        $pos = strpos($str, $match);
+        return is_bool($pos) && $pos == false ? -1:$pos;
+    }
+    public static function lastIndexOf($str, $match){ //從字串結尾搜尋相符字串索引
+        $pos = strrpos($str, $match);
+        return is_bool($pos) && $pos == false ? -1:$pos;
+    }
     public static function repeat($str, $match){return substr_count($str, $match);} //相符字串出現次數
     public static function split($str, $delimiter){return explode($delimiter, $str);} //取得打散字串陣列
     public static function lower($str){return strtolower($str);} //字串字母皆小寫
@@ -136,7 +138,7 @@ class AP_String extends  AP_Object {
     public static function substr($str, $start, $len = 0) //取得子字串，若無設定長度則取得開始點到最尾端字串
     {return substr($str, $start, $len == 0 ? AP_String::length($str)-$start : $len);}
     public static function replace($str, $pattern, $replace) //取代指定字串
-    {return preg_replace($pattern{0}=="/"?$pattern:"/".$pattern."/", $replace, $str);}
+    {return preg_replace($pattern, $replace, $str);}
 
 }
 
@@ -153,7 +155,7 @@ class AP_Array extends AP_Object {
     public static function sort(&$arr, $type = SORT_NATURAL){sort($arr, $type);} //陣列排序
     public static function inArray(&$arr, $match){return in_array($match, $arr, TRUE);} //檢查子元素是否存在
     public static function slice(&$arr, $start, $len = 0) //取得子字串，若無設定長度則取得開始點到最尾端字串
-    {return array_slice($arr, $start, $len == 0 ? cd_array_length($arr)-$start : $len);}
+    {return array_slice($arr, $start, $len == 0 ? count($arr)-$start : $len);}
     public static function splice(&$arr, $start, $len = 0, $add = NULL) //陣列中刪增元素
     {return is_array($add) ? array_splice($arr, $start, $len, $add) : array_splice($arr, $start, $len);}
     public static function concat(/*...*/) //合併一個或多個陣列
