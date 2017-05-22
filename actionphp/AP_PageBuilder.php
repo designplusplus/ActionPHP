@@ -33,37 +33,25 @@ class AP_PageBuilder extends AP_Object {
 
     public static function body_set_html(string $url, array $key_val_arr=null) {
         $body = AP_String::trim(file_get_contents($url));
-        $slice_start_record = array();
-        $slice_end_record = array();
-        $seg = '<!--css-->';
-        $findIndex = AP_String::indexOf($body, $seg);
-        if($findIndex != -1) {
-            AP_Array::push($slice_end_record, $findIndex);
-            $slice_start_record['css'] = $findIndex + AP_String::length($seg) + 1;
-        }
-        $seg = '<!--js-->';
-        $findIndex = AP_String::indexOf($body, $seg);
-        if($findIndex != -1) {
-            AP_Array::push($slice_end_record, $findIndex);
-            $slice_start_record['js'] = $findIndex + AP_String::length($seg) + 1;
-        }
-        $seg = '<!--html-->';
-        $findIndex = AP_String::indexOf($body, $seg);
-        if($findIndex != -1) {
-            AP_Array::push($slice_end_record, $findIndex);
-            $slice_start_record['html'] = $findIndex + AP_String::length($seg) + 1;
-        }
-        asort($slice_end_record);
-        asort($slice_start_record);
-        AP_Array::shift($slice_end_record);
-        AP_Array::push($slice_end_record, AP_String::lastIndexOf($body,'>') + 1);
-
-        $types = array_keys($slice_start_record);
-        $slice_start = array_values($slice_start_record);
-        $slice_end = $slice_end_record;
         $code = array();
-        foreach ($types as $k=>$v)
-            $code[$v] = AP_String::substr($body, $slice_start[$k], $slice_end[$k] - $slice_start[$k]);
+        $seg = '<style>';
+        $startIndex = AP_String::indexOf($body, $seg);
+        $seg = '</style>';
+        $endIndex = AP_String::indexOf($body, $seg) + AP_String::length($seg);
+        if($startIndex != -1 && $endIndex != -1)
+            $code['css'] = AP_String::substr($body, $startIndex, $endIndex - $startIndex);
+        $seg = '<script>';
+        $startIndex = AP_String::indexOf($body, $seg);
+        $seg = '</script>';
+        $endIndex = AP_String::indexOf($body, $seg) + AP_String::length($seg);
+        if($startIndex != -1 && $endIndex != -1)
+            $code['js'] = AP_String::substr($body, $startIndex, $endIndex - $startIndex);
+        $seg = '<body';
+        $startIndex = AP_String::indexOf($body, $seg);
+        $seg = '</body>';
+        $endIndex = AP_String::indexOf($body, $seg) + AP_String::length($seg);
+        if($startIndex != -1 && $endIndex != -1)
+            $code['html'] = AP_String::substr($body, $startIndex, $endIndex - $startIndex);
 
         // html compress
         if(isset($code['html'])) {
@@ -115,9 +103,7 @@ class AP_PageBuilder extends AP_Object {
         $b .= self::$head_css;
         $b .= self::$head_js;
         $b .= '</head>';
-        $b .= '<body>';
         $b .= self::$page_body;
-        $b .= '</body>';
         $b .= '</html>';
         echo $b;
     }
