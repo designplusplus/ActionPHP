@@ -37,6 +37,10 @@ function ap_fun_isNull($mixed):bool {
     return is_null($mixed) ? true : false;
 }
 
+function ap_fun_isArray($mixed):bool {
+    return is_array($mixed) ? true : false;
+}
+
 function ap_fun_number($number) {
     if(is_null($number)) return 0;
     if(is_bool($number) && $number == true) return 1;
@@ -153,10 +157,10 @@ class AP_Array extends AP_Object {
     public static function unshift(&$arr, $elem){array_unshift($arr, $elem);} //新增元素在陣列最前方
     public static function reverse(&$arr){return array_reverse($arr);} //回傳反向陣列
     public static function sort(&$arr, $type = SORT_NATURAL){sort($arr, $type);} //陣列排序
-    public static function inArray(&$arr, $match){return in_array($match, $arr, TRUE);} //檢查子元素是否存在
+    public static function inArray(&$arr, $match){return in_array($match, $arr, true);} //檢查子元素是否存在
     public static function slice(&$arr, $start, $len = 0) //取得子字串，若無設定長度則取得開始點到最尾端字串
     {return array_slice($arr, $start, $len == 0 ? count($arr)-$start : $len);}
-    public static function splice(&$arr, $start, $len = 0, $add = NULL) //陣列中刪增元素
+    public static function splice(&$arr, $start, $len = 0, $add = null) //陣列中刪增元素
     {return is_array($add) ? array_splice($arr, $start, $len, $add) : array_splice($arr, $start, $len);}
     public static function concat(/*...*/) //合併一個或多個陣列
     {
@@ -215,28 +219,30 @@ class AP_Date extends AP_Object {
 class AP_Validator extends AP_Object {
 
     private function __construct() {}
-    public static function test_email($str){return !filter_var($str, FILTER_VALIDATE_EMAIL)?FALSE:TRUE;}
-    public static function test_url($str){return !filter_var($str, FILTER_VALIDATE_URL)?FALSE:TRUE;}
-    public static function test_ipv4($str){return !filter_var($str, FILTER_VALIDATE_IP)?FALSE:TRUE;}
-    public static function test_ipv6($str){return !filter_var($str, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)?FALSE:TRUE;}
-    public static function test_int($str){return !filter_var($str, FILTER_VALIDATE_INT)?FALSE:TRUE;}
-    public static function test_float($str){return !filter_var($str, FILTER_VALIDATE_FLOAT)?FALSE:TRUE;}
-    public static function test_between($num, $min, $max){return !filter_var($num, FILTER_VALIDATE_FLOAT, array("options" => array("min_range"=>$min, "max_range"=>$max)))?FALSE:TRUE;}
-    public static function test_length($str, $min, $max){return !filter_var(AP_String::length($str), FILTER_VALIDATE_INT, array("options" => array("min_range"=>$min, "max_range"=>$max)))?FALSE:TRUE;}
-    public static function test_chineseName($str){return !filter_var($str, FILTER_VALIDATE_REGEXP, array("options"=>array("regexp"=>"/^([\x7f-\xff]+)$/")))?FALSE:TRUE;}
-    public static function test_englishName($str){return !filter_var($str, FILTER_VALIDATE_REGEXP, array("options"=>array("regexp"=>"/^([ A-Za-z]+)$/")))?FALSE:TRUE;}
-    public static function test_password($str){return !filter_var($str, FILTER_VALIDATE_REGEXP, array("options"=>array("regexp"=>"/^[_a-zA-Z0-9!@#$%^&*]+$/")))?FALSE:TRUE;}
-    public static function test_variableName($str){return !filter_var($str, FILTER_VALIDATE_REGEXP, array("options"=>array("regexp"=>"/^[_A-Za-z]{1}[_0-9A-Za-z]+$/")))?FALSE:TRUE;}
-    public static function test_color($hex){return !filter_var($hex, FILTER_VALIDATE_REGEXP, array("options"=>array("regexp"=>"/^#([0-9A-Za-z]{3}|[0-9A-Za-z]{6}|[0-9A-Za-z]{8})$/")))?FALSE:TRUE;}
-    public static function test_image($filename){return !filter_var($filename, FILTER_VALIDATE_REGEXP, array("options"=>array("regexp"=>"/^[_0-9A-Za-z\-\x7f-\xff]+\.(gif|jpg|jpeg|png)$/")))?FALSE:TRUE;}
-    public static function test_fileType($filename, &$types_arr){return !filter_var($filename, FILTER_VALIDATE_REGEXP, array("options"=>array("regexp"=>"/^[_0-9A-Za-z\-\x7f-\xff]+\.(".AP_Array::join($types_arr, "|").")$/")))?FALSE:TRUE;}
-    public static function test_preg($str, $pattern){return !filter_var($str, FILTER_VALIDATE_REGEXP, array("options"=>array("regexp"=>$pattern)))?FALSE:TRUE;}
-    public static function test_fileExists($file){return file_exists($file)?TRUE:FALSE;}
+    public static function test_email($str){return !filter_var($str, FILTER_VALIDATE_EMAIL)?false:true;}
+    public static function test_url($str){return !filter_var($str, FILTER_VALIDATE_URL)?false:true;}
+    public static function test_ipv4($str){return !filter_var($str, FILTER_VALIDATE_IP)?false:true;}
+    public static function test_ipv6($str){return !filter_var($str, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)?false:true;}
+    public static function test_int($num){return !filter_var($num, FILTER_VALIDATE_INT)?false:true;}
+    public static function test_uint($num){return !filter_var($num, FILTER_VALIDATE_INT)?false:$num<0?false:true;}
+    public static function test_float($num){return !filter_var($num, FILTER_VALIDATE_FLOAT)?false:true;}
+    public static function test_ufloat($num){return !filter_var($num, FILTER_VALIDATE_FLOAT)?false:$num<0?false:true;}
+    public static function test_between($num, $min, $max){return !filter_var($num, FILTER_VALIDATE_FLOAT, array("options" => array("min_range"=>$min, "max_range"=>$max)))?false:true;}
+    public static function test_length($str, $min, $max){return !filter_var(AP_String::length($str), FILTER_VALIDATE_INT, array("options" => array("min_range"=>$min, "max_range"=>$max)))?false:true;}
+    public static function test_chineseName($str){return !filter_var($str, FILTER_VALIDATE_REGEXP, array("options"=>array("regexp"=>"/^([\x7f-\xff]+)$/")))?false:true;}
+    public static function test_englishName($str){return !filter_var($str, FILTER_VALIDATE_REGEXP, array("options"=>array("regexp"=>"/^([ A-Za-z]+)$/")))?false:true;}
+    public static function test_password($str){return !filter_var($str, FILTER_VALIDATE_REGEXP, array("options"=>array("regexp"=>"/^[_a-zA-Z0-9!@#$%^&*]+$/")))?false:true;}
+    public static function test_variableName($str){return !filter_var($str, FILTER_VALIDATE_REGEXP, array("options"=>array("regexp"=>"/^[_A-Za-z]{1}[_0-9A-Za-z]+$/")))?false:true;}
+    public static function test_color($hex){return !filter_var($hex, FILTER_VALIDATE_REGEXP, array("options"=>array("regexp"=>"/^#([0-9A-Za-z]{3}|[0-9A-Za-z]{6}|[0-9A-Za-z]{8})$/")))?false:true;}
+    public static function test_image($filename){return !filter_var($filename, FILTER_VALIDATE_REGEXP, array("options"=>array("regexp"=>"/^[_0-9A-Za-z\-\x7f-\xff]+\.(gif|jpg|jpeg|png)$/")))?false:true;}
+    public static function test_fileType($filename, &$types_arr){return !filter_var($filename, FILTER_VALIDATE_REGEXP, array("options"=>array("regexp"=>"/^[_0-9A-Za-z\-\x7f-\xff]+\.(".AP_Array::join($types_arr, "|").")$/")))?false:true;}
+    public static function test_preg($str, $pattern){return !filter_var($str, FILTER_VALIDATE_REGEXP, array("options"=>array("regexp"=>$pattern)))?false:true;}
+    public static function test_fileExists($file){return file_exists($file)?true:false;}
     public static function test_date($str){
         $d = AP_String::split($str,"-");
-        if(!AP_Validator::test_between($d[1],1,12))return FALSE;
-        if(!AP_Validator::test_between($d[2],1,31))return FALSE;
-        return !filter_var($str, FILTER_VALIDATE_REGEXP, array("options"=>array("regexp"=>"/^[0-9]{4}\-[0-9]{2}\-[0-9]{2}$/")))?FALSE:TRUE;
+        if(!AP_Validator::test_between($d[1],1,12))return false;
+        if(!AP_Validator::test_between($d[2],1,31))return false;
+        return !filter_var($str, FILTER_VALIDATE_REGEXP, array("options"=>array("regexp"=>"/^[0-9]{4}\-[0-9]{2}\-[0-9]{2}$/")))?false:true;
     }
 
 }
@@ -249,6 +255,6 @@ class AP_Coder extends AP_Object {
     public static function encode_base64($str){return base64_encode($str);} //取得Base64編碼後字串
     public static function decode_base64($encoded_str){return base64_decode($encoded_str);} //取得Base64解碼後字串
     public static function encode_json($arr){return json_encode($arr);} //取得Json編碼後字串
-    public static function decode_json($json_str){return json_decode($json_str, TRUE);} //取得Json解碼後陣列
+    public static function decode_json($json_str){return json_decode($json_str, true);} //取得Json解碼後陣列
 
 }
